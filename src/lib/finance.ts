@@ -171,6 +171,7 @@ export function gerarRecorrentesPendentes(
       datas.push(d);
       d = proximoVencimento(rec, d);
     }
+    if (datas.length === 0) continue;
     for (const data of datas) {
       novos.push({
         conta_id: rec.conta_id,

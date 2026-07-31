@@ -207,6 +207,14 @@ describe('gerarRecorrentesPendentes', () => {
     expect(novos[0].data).toBe('2026-08-04');
     expect(novos[4].data).toBe('2026-09-01');
   });
+
+  it('não atualiza ultimo_processado quando a próxima ocorrência ainda não venceu', () => {
+    // dia 31 processado em 2026-07-31; em 2026-08-01 a próxima ocorrência (31/08) ainda não venceu
+    const rec = { ...aluguel, ultimo_processado: '2026-07-31' };
+    const { novos, atualizados } = gerarRecorrentesPendentes([rec], '2026-08-01');
+    expect(novos).toEqual([]);
+    expect(atualizados).toEqual([]);
+  });
 });
 
 describe('primeiroPendente', () => {
