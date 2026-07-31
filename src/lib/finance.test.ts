@@ -139,3 +139,84 @@ describe('projetar6meses', () => {
     expect(proj[0].saldo).toBe(1000);
   });
 });
+
+import { calcularProgresso, depositoSugerido, primeiroPendente, gerarRecorrentesPendentes } from './finance';
+
+describe('calcularProgresso', () => {
+  it('calcula total e percentual do mês', () => {
+    const p = calcularProgresso(160, 200);
+    expect(p.total).toBe(160);
+    expect(p.percentual).toBe(0.8);
+    expect(p.estourou).toBe(false);
+  });
+
+  it('marca estourou quando passa de 100%', () => {
+    const p = calcularProgresso(201, 200);
+    expect(p.estourou).toBe(true);
+  });
+});
+
+describe('depositoSugerido', () => {
+  it('divide o restante pelos meses restantes', () => {
+    // 3000 alvo, 1200 atual, 6 meses até o alvo -> 1800/6 = 300
+    expect(depositoSugerido(3000, 1200, '2026-12-31', '2026-07-01')).toBe(300);
+  });
+
+  it('sem prazo devolve o valor restante', () => {
+    expect(depositoSugerido(3000, 1000, null, '2026-07-01')).toBe(2000);
+  });
+
+  it('meta já atingida devolve zero', () => {
+    expect(depositoSugerido(3000, 3500, '2026-12-31', '2026-07-01')).toBe(0);
+  });
+});
+
+describe('gerarRecorrentesPendentes', () => {
+  it('gera ocorrências vencidas desde o último processamento sem duplicar', () => {
+    const rec = { ...aluguel, ultimo_processado: '2026-07-31' };
+    const { novos, atualizados } = gerarRecorrentesPendentes([rec], '2026-10-01');
+    expect(novos.map((n) => n.data)).toEqual(['2026-08-31', '2026-09-30']);
+    expect(novos[0].descricao).toBe('Aluguel');
+    expect(atualizados[0].ultimo_processado).toBe('2026-09-30');
+  });
+
+  it('recorrente nunca processada só gera a partir de hoje', () => {
+    const rec = { ...aluguel, ultimo_processado: null }; // dia 31
+    const { novos } = gerarRecorrentesPendentes([rec], '2026-07-20');
+    expect(novos).toEqual([]);
+  });
+
+  it('nunca processada e no dia gera a ocorrência de hoje', () => {
+    const rec = { ...salario, ultimo_processado: null }; // dia 5
+    const { novos } = gerarRecorrentesPendentes([rec], '2026-07-05');
+    expect(novos.map((n) => n.data)).toEqual(['2026-07-05']);
+  });
+
+  it('ignora recorrentes inativas', () => {
+    const rec = { ...aluguel, ativo: false, ultimo_processado: '2026-07-31' };
+    const { novos, atualizados } = gerarRecorrentesPendentes([rec], '2026-09-10');
+    expect(novos).toEqual([]);
+    expect(atualizados).toEqual([]);
+  });
+
+  it('semanal gera todas as semanas desde o último processamento', () => {
+    // último 2026-08-03 (segunda); próximas terças: 04, 11, 18, 25/08 e 01/09
+    const rec = { ...academia, ultimo_processado: '2026-08-03' };
+    const { novos } = gerarRecorrentesPendentes([rec], '2026-09-02');
+    expect(novos.length).toBe(5);
+    expect(novos[0].data).toBe('2026-08-04');
+    expect(novos[4].data).toBe('2026-09-01');
+  });
+});
+
+describe('primeiroPendente', () => {
+  it('mensal dentro do mês atual', () => {
+    expect(primeiroPendente({ ...salario, ultimo_processado: null }, '2026-07-05')).toBe('2026-07-05');
+    expect(primeiroPendente({ ...salario, ultimo_processado: null }, '2026-07-03')).toBe(null);
+  });
+
+  it('semanal dentro dos últimos 7 dias', () => {
+    // 2026-08-04 é terça (dia 2); 2 dias antes é 2026-08-02 (domingo)
+    expect(primeiroPendente({ ...academia, ultimo_processado: null }, '2026-08-04')).toBe('2026-08-04');
+  });
+});

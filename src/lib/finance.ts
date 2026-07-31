@@ -118,3 +118,71 @@ export function projetar6meses(
   }
   return resultado;
 }
+
+export interface ProgressoLimite {
+  total: number;
+  percentual: number;
+  estourou: boolean;
+}
+
+export function calcularProgresso(total: number, limiteMensal: number): ProgressoLimite {
+  const percentual = limiteMensal > 0 ? arredondar(total / limiteMensal) : 0;
+  return { total, percentual, estourou: percentual >= 1 };
+}
+
+export function depositoSugerido(valorAlvo: number, saldoAtual: number, dataAlvo: string | null, hoje: string): number {
+  const restante = arredondar(valorAlvo - saldoAtual);
+  if (restante <= 0) return 0;
+  if (!dataAlvo) return restante;
+  const [aAno, aMes, aDia] = hoje.split('-').map(Number);
+  const [bAno, bMes, bDia] = dataAlvo.split('-').map(Number);
+  let meses = (bAno - aAno) * 12 + (bMes - aMes) + 1;
+  if (bDia < aDia) meses -= 1;
+  if (meses <= 0) return restante;
+  return arredondar(restante / meses);
+}
+
+export function primeiroPendente(rec: Recorrente, hoje: string): string | null {
+  const [ano, mes] = hoje.split('-').map(Number);
+  if (rec.frequencia === 'mensal') {
+    const cand = dataDoDia(ano, mes, Math.min(rec.dia, diasNoMes(ano, mes)));
+    return cand <= hoje ? cand : null;
+  }
+  for (let i = 0; i < 7; i++) {
+    const d = somarDias(hoje, -i);
+    if (new Date(d + 'T00:00:00').getDay() === rec.dia) return d <= hoje ? d : null;
+  }
+  return null;
+}
+
+export function gerarRecorrentesPendentes(
+  recorrentes: Recorrente[],
+  hoje: string
+): { novos: NovoLancamento[]; atualizados: Recorrente[] } {
+  const novos: NovoLancamento[] = [];
+  const atualizados: Recorrente[] = [];
+  for (const rec of recorrentes) {
+    if (!rec.ativo) continue;
+    const primeiro = rec.ultimo_processado ? proximoVencimento(rec, rec.ultimo_processado) : primeiroPendente(rec, hoje);
+    if (!primeiro) continue;
+    const datas: string[] = [];
+    let d = primeiro;
+    while (d <= hoje) {
+      datas.push(d);
+      d = proximoVencimento(rec, d);
+    }
+    for (const data of datas) {
+      novos.push({
+        conta_id: rec.conta_id,
+        conta_destino_id: null,
+        tipo: rec.tipo,
+        categoria_id: rec.categoria_id,
+        valor: rec.valor,
+        data,
+        descricao: rec.nome
+      });
+    }
+    atualizados.push({ ...rec, ultimo_processado: datas[datas.length - 1] });
+  }
+  return { novos, atualizados };
+}
