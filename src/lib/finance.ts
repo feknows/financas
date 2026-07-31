@@ -41,3 +41,80 @@ export function faturaMes(cartaoId: number, lancamentos: Lancamento[], mes: stri
   }
   return { compras: arredondar(compras), pagamentos: arredondar(pagamentos), fatura: arredondar(compras - pagamentos) };
 }
+
+export function diasNoMes(ano: number, mes: number): number {
+  return new Date(ano, mes, 0).getDate();
+}
+
+export function formatarData(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+export function somarDias(data: string, dias: number): string {
+  const d = new Date(data + 'T00:00:00');
+  d.setDate(d.getDate() + dias);
+  return formatarData(d);
+}
+
+function dataDoDia(ano: number, mes: number, dia: number): string {
+  return `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+}
+
+export function proximoVencimento(rec: Recorrente, depoisDe: string): string {
+  if (rec.frequencia === 'mensal') {
+    const [ano, mes] = depoisDe.split('-').map(Number);
+    const cand = dataDoDia(ano, mes, Math.min(rec.dia, diasNoMes(ano, mes)));
+    if (cand > depoisDe) return cand;
+    let novoAno = ano;
+    let novoMes = mes + 1;
+    if (novoMes === 13) { novoMes = 1; novoAno += 1; }
+    return dataDoDia(novoAno, novoMes, Math.min(rec.dia, diasNoMes(novoAno, novoMes)));
+  }
+  for (let i = 1; i <= 7; i++) {
+    const d = somarDias(depoisDe, i);
+    if (new Date(d + 'T00:00:00').getDay() === rec.dia) return d;
+  }
+  throw new Error('Nunca deveria chegar aqui');
+}
+
+export function ocorrenciasNoMes(rec: Recorrente, ano: number, mes: number, aPartirDe: string | null = null): string[] {
+  const resultado: string[] = [];
+  if (rec.frequencia === 'mensal') {
+    const d = dataDoDia(ano, mes, Math.min(rec.dia, diasNoMes(ano, mes)));
+    if (!aPartirDe || d > aPartirDe) resultado.push(d);
+    return resultado;
+  }
+  const total = diasNoMes(ano, mes);
+  for (let dia = 1; dia <= total; dia++) {
+    const d = dataDoDia(ano, mes, dia);
+    if (new Date(d + 'T00:00:00').getDay() !== rec.dia) continue;
+    if (!aPartirDe || d > aPartirDe) resultado.push(d);
+  }
+  return resultado;
+}
+
+export function projetar6meses(
+  contas: Conta[],
+  lancamentos: Lancamento[],
+  recorrentes: Recorrente[],
+  hoje: string
+): { mes: string; saldo: number }[] {
+  const base = patrimonio(contas, lancamentos);
+  const [anoBase, mesBase] = hoje.split('-').map(Number);
+  const resultado: { mes: string; saldo: number }[] = [];
+  let saldo = base;
+  for (let i = 0; i < 6; i++) {
+    const ano = anoBase + Math.floor((mesBase - 1 + i) / 12);
+    const mes = ((mesBase - 1 + i) % 12) + 1;
+    let liquido = 0;
+    for (const rec of recorrentes) {
+      if (!rec.ativo) continue;
+      const ocorrencias = ocorrenciasNoMes(rec, ano, mes, i === 0 ? hoje : null);
+      const fator = rec.tipo === 'receita' ? 1 : -1;
+      liquido += ocorrencias.length * rec.valor * fator;
+    }
+    saldo += liquido;
+    resultado.push({ mes: `${ano}-${String(mes).padStart(2, '0')}`, saldo: arredondar(saldo) });
+  }
+  return resultado;
+}
