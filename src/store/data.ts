@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import { gerarRecorrentesPendentes } from '../lib/finance';
+import { hojeISO } from '../lib/format';
 import type { Conta, Categoria, Lancamento, Recorrente, Limite, Meta } from '../types';
 
 const num = (v: unknown) => Number(v ?? 0);
@@ -101,11 +102,12 @@ export const useDataStore = create<DataState>((set, get) => ({
   processarRecorrentes: async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const hoje = new Date().toISOString().slice(0, 10);
+    const hoje = hojeISO();
     const { novos, atualizados } = gerarRecorrentesPendentes(get().recorrentes, hoje);
     if (novos.length === 0) return;
     const linhas = novos.map((n) => ({ ...n, user_id: user.id }));
-    await supabase.from('lancamentos').insert(linhas);
+    const { error } = await supabase.from('lancamentos').insert(linhas);
+    if (error) throw error;
     for (const r of atualizados) {
       await supabase.from('recorrentes').update({ ultimo_processado: r.ultimo_processado }).eq('id', r.id);
     }
