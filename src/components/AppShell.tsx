@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import { useDataStore } from '../store/data';
+import Toast from './Toast';
 
 const abas = [
   { para: '/', rotulo: 'Visão Geral', icone: '◈' },
@@ -62,6 +63,7 @@ export default function AppShell() {
           ))}
         </div>
       </nav>
+      <Toast />
     </div>
   );
 }
