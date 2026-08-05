@@ -286,4 +286,10 @@ describe('statusRecorrente', () => {
     const rec = { ...aluguel, ultimo_processado: '2026-01-31' };
     expect(statusRecorrente(rec, '2026-02-28')).toEqual({ tipo: 'hoje' });
   });
+
+  it('inativa com próximo vencimento hoje avança para o futuro', () => {
+    // academia é semanal dia 2 (terça); 2026-08-04 é terça
+    const rec = { ...academia, ativo: false, ultimo_processado: '2026-07-28' };
+    expect(statusRecorrente(rec, '2026-08-04')).toEqual({ tipo: 'futuro', data: '2026-08-11' });
+  });
 });

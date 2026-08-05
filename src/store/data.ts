@@ -134,16 +134,27 @@ export const useDataStore = create<DataState>((set, get) => ({
 
   excluirConta: async (id) => {
     const antes = get().contas;
+    const item = antes.find((x) => x.id === id);
+    const indice = antes.findIndex((x) => x.id === id);
     set({ contas: antes.filter((x) => x.id !== id) });
+    const restaurar = () => {
+      const atual = [...get().contas];
+      atual.splice(indice, 0, item!);
+      set({ contas: atual });
+    };
     let cancelado = false;
     useToastStore.getState().mostrar('Conta excluída', () => {
       cancelado = true;
-      set({ contas: antes });
+      restaurar();
     });
     setTimeout(async () => {
       if (cancelado) return;
-      const { error } = await supabase.from('contas').delete().eq('id', id);
-      if (error) set({ contas: antes });
+      try {
+        const { error } = await supabase.from('contas').delete().eq('id', id);
+        if (error) restaurar();
+      } catch {
+        restaurar();
+      }
     }, 6000);
   },
 
@@ -163,16 +174,27 @@ export const useDataStore = create<DataState>((set, get) => ({
 
   excluirCategoria: async (id) => {
     const antes = get().categorias;
+    const item = antes.find((x) => x.id === id);
+    const indice = antes.findIndex((x) => x.id === id);
     set({ categorias: antes.filter((x) => x.id !== id) });
+    const restaurar = () => {
+      const atual = [...get().categorias];
+      atual.splice(indice, 0, item!);
+      set({ categorias: atual });
+    };
     let cancelado = false;
     useToastStore.getState().mostrar('Categoria excluída', () => {
       cancelado = true;
-      set({ categorias: antes });
+      restaurar();
     });
     setTimeout(async () => {
       if (cancelado) return;
-      const { error } = await supabase.from('categorias').delete().eq('id', id);
-      if (error) set({ categorias: antes });
+      try {
+        const { error } = await supabase.from('categorias').delete().eq('id', id);
+        if (error) restaurar();
+      } catch {
+        restaurar();
+      }
     }, 6000);
   },
 
@@ -201,16 +223,27 @@ export const useDataStore = create<DataState>((set, get) => ({
 
   excluirLancamento: async (id) => {
     const antes = get().lancamentos;
+    const item = antes.find((x) => x.id === id);
+    const indice = antes.findIndex((x) => x.id === id);
     set({ lancamentos: antes.filter((x) => x.id !== id) });
+    const restaurar = () => {
+      const atual = [...get().lancamentos];
+      atual.splice(indice, 0, item!);
+      set({ lancamentos: atual });
+    };
     let cancelado = false;
     useToastStore.getState().mostrar('Lançamento excluído', () => {
       cancelado = true;
-      set({ lancamentos: antes });
+      restaurar();
     });
     setTimeout(async () => {
       if (cancelado) return;
-      const { error } = await supabase.from('lancamentos').delete().eq('id', id);
-      if (error) set({ lancamentos: antes });
+      try {
+        const { error } = await supabase.from('lancamentos').delete().eq('id', id);
+        if (error) restaurar();
+      } catch {
+        restaurar();
+      }
     }, 6000);
   },
 
@@ -233,16 +266,27 @@ export const useDataStore = create<DataState>((set, get) => ({
 
   excluirRecorrente: async (id) => {
     const antes = get().recorrentes;
+    const item = antes.find((x) => x.id === id);
+    const indice = antes.findIndex((x) => x.id === id);
     set({ recorrentes: antes.filter((x) => x.id !== id) });
+    const restaurar = () => {
+      const atual = [...get().recorrentes];
+      atual.splice(indice, 0, item!);
+      set({ recorrentes: atual });
+    };
     let cancelado = false;
     useToastStore.getState().mostrar('Recorrente excluída', () => {
       cancelado = true;
-      set({ recorrentes: antes });
+      restaurar();
     });
     setTimeout(async () => {
       if (cancelado) return;
-      const { error } = await supabase.from('recorrentes').delete().eq('id', id);
-      if (error) set({ recorrentes: antes });
+      try {
+        const { error } = await supabase.from('recorrentes').delete().eq('id', id);
+        if (error) restaurar();
+      } catch {
+        restaurar();
+      }
     }, 6000);
   },
 
@@ -285,16 +329,27 @@ export const useDataStore = create<DataState>((set, get) => ({
 
   excluirMeta: async (id) => {
     const antes = get().metas;
+    const item = antes.find((x) => x.id === id);
+    const indice = antes.findIndex((x) => x.id === id);
     set({ metas: antes.filter((x) => x.id !== id) });
+    const restaurar = () => {
+      const atual = [...get().metas];
+      atual.splice(indice, 0, item!);
+      set({ metas: atual });
+    };
     let cancelado = false;
     useToastStore.getState().mostrar('Meta excluída', () => {
       cancelado = true;
-      set({ metas: antes });
+      restaurar();
     });
     setTimeout(async () => {
       if (cancelado) return;
-      const { error } = await supabase.from('metas').delete().eq('id', id);
-      if (error) set({ metas: antes });
+      try {
+        const { error } = await supabase.from('metas').delete().eq('id', id);
+        if (error) restaurar();
+      } catch {
+        restaurar();
+      }
     }, 6000);
   }
 }));

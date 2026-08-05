@@ -207,7 +207,7 @@ export function statusRecorrente(rec: Recorrente, hoje: string): StatusRecorrent
   if (!rec.ativo) {
     const base = rec.ultimo_processado ?? somarDias(hoje, -1);
     let data = proximoVencimento(rec, base);
-    while (data < hoje) data = proximoVencimento(rec, data);
+    while (data <= hoje) data = proximoVencimento(rec, data);
     return { tipo: 'futuro', data };
   }
 
