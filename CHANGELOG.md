@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0 — 2026-08-05
+
+- Recorrentes mostram o status de vencimento em cada linha (Pendente desde, Vence hoje, Vence amanhã, Em X dias).
+- Exclusões (lançamentos, contas, categorias, metas e recorrentes) agora são adiadas por 6 segundos com botão Desfazer — e o `confirm()` de confirmação foi removido.
+- Desfazer re-insere o item no lugar original; se a exclusão falhar no banco, o item é restaurado automaticamente.
+
 ## 1.0.0 — 2026-07-31
 
 - Primeira versão do app Finanças (PWA).
