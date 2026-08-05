@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import Modal from '../components/Modal';
 import { useDataStore } from '../store/data';
-import { proximoVencimento, somarDias } from '../lib/finance';
-import { brl, hojeISO } from '../lib/format';
+import { statusRecorrente } from '../lib/finance';
+import { brl, dataBonita, hojeISO } from '../lib/format';
 import type { Recorrente, TipoCategoria } from '../types';
 
 export default function Recorrentes() {
@@ -27,9 +27,13 @@ export default function Recorrentes() {
   const nomeConta = (id: number) => contas.find((c) => c.id === id)?.nome ?? '?';
   const hoje = hojeISO();
 
-  const proximoDe = (r: Recorrente): string => {
-    const base = r.ultimo_processado ?? somarDias(hoje, -1);
-    return proximoVencimento(r, base);
+  const statusLinha = (r: Recorrente) => {
+    const s = statusRecorrente(r, hoje);
+    if (s.tipo === 'atrasado') return <p className="text-xs text-danger">Pendente desde {dataBonita(s.data)}</p>;
+    if (s.tipo === 'hoje') return <p className="text-xs font-semibold text-primary">Vence hoje</p>;
+    if (s.tipo === 'amanha') return <p className="text-xs font-semibold text-primary">Vence amanhã</p>;
+    const dias = Math.round((new Date(s.data + 'T00:00:00').getTime() - new Date(hoje + 'T00:00:00').getTime()) / 86400000);
+    return <p className="text-xs text-ink-muted">Em {dias} dias ({dataBonita(s.data)})</p>;
   };
 
   const abrir = (r: Recorrente | null) => {
@@ -89,7 +93,7 @@ export default function Recorrentes() {
               <div className="flex-1">
                 <p className="font-semibold">{r.nome}</p>
                 <p className="num text-sm text-ink-muted">{r.tipo === 'receita' ? '+' : '−'}{brl(r.valor)} · {nomeConta(r.conta_id)}</p>
-                <p className="text-xs text-ink-muted">Próximo: {proximoDe(r)} · {r.frequencia}</p>
+                {statusLinha(r)}
               </div>
               <button onClick={() => alternarAtivo(r)}
                 className={`rounded-full px-3 py-1 text-xs font-semibold ${r.ativo ? 'bg-primary-soft text-primary' : 'bg-raised text-ink-muted'}`}>
