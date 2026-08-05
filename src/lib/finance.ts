@@ -187,3 +187,35 @@ export function gerarRecorrentesPendentes(
   }
   return { novos, atualizados };
 }
+
+export type StatusRecorrente =
+  | { tipo: 'atrasado'; data: string }
+  | { tipo: 'hoje' }
+  | { tipo: 'amanha' }
+  | { tipo: 'futuro'; data: string };
+
+export function statusRecorrente(rec: Recorrente, hoje: string): StatusRecorrente {
+  const amanha = somarDias(hoje, 1);
+
+  const classificar = (data: string): StatusRecorrente => {
+    if (data < hoje) return { tipo: 'atrasado', data };
+    if (data === hoje) return { tipo: 'hoje' };
+    if (data === amanha) return { tipo: 'amanha' };
+    return { tipo: 'futuro', data };
+  };
+
+  if (!rec.ativo) {
+    const base = rec.ultimo_processado ?? somarDias(hoje, -1);
+    let data = proximoVencimento(rec, base);
+    while (data < hoje) data = proximoVencimento(rec, data);
+    return { tipo: 'futuro', data };
+  }
+
+  if (rec.ultimo_processado) {
+    return classificar(proximoVencimento(rec, rec.ultimo_processado));
+  }
+
+  const pendente = primeiroPendente(rec, hoje);
+  if (pendente) return classificar(pendente);
+  return classificar(proximoVencimento(rec, somarDias(hoje, -1)));
+}

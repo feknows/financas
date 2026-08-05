@@ -228,3 +228,62 @@ describe('primeiroPendente', () => {
     expect(primeiroPendente({ ...academia, ultimo_processado: null }, '2026-08-04')).toBe('2026-08-04');
   });
 });
+
+import { statusRecorrente } from './finance';
+
+describe('statusRecorrente', () => {
+  it('atrasada com ultimo_processado mostra a pendência vencida', () => {
+    const rec = { ...aluguel, ultimo_processado: '2026-06-30' };
+    expect(statusRecorrente(rec, '2026-08-10')).toEqual({ tipo: 'atrasado', data: '2026-07-31' });
+  });
+
+  it('nunca processada e dia do mês já passou mostra atrasado', () => {
+    const rec = { ...salario, ultimo_processado: null };
+    expect(statusRecorrente(rec, '2026-07-10')).toEqual({ tipo: 'atrasado', data: '2026-07-05' });
+  });
+
+  it('vence hoje com ultimo_processado', () => {
+    const rec = { ...salario, ultimo_processado: '2026-06-05' };
+    expect(statusRecorrente(rec, '2026-07-05')).toEqual({ tipo: 'hoje' });
+  });
+
+  it('vence hoje nunca processada', () => {
+    const rec = { ...salario, ultimo_processado: null };
+    expect(statusRecorrente(rec, '2026-07-05')).toEqual({ tipo: 'hoje' });
+  });
+
+  it('vence amanhã com ultimo_processado', () => {
+    const rec = { ...salario, ultimo_processado: '2026-06-05' };
+    expect(statusRecorrente(rec, '2026-07-04')).toEqual({ tipo: 'amanha' });
+  });
+
+  it('vence amanhã nunca processada', () => {
+    const rec = { ...salario, ultimo_processado: null };
+    expect(statusRecorrente(rec, '2026-07-04')).toEqual({ tipo: 'amanha' });
+  });
+
+  it('futura mostra a data do próximo vencimento', () => {
+    const rec = { ...salario, ultimo_processado: '2026-07-05' };
+    expect(statusRecorrente(rec, '2026-07-20')).toEqual({ tipo: 'futuro', data: '2026-08-05' });
+  });
+
+  it('nunca processada e dia ainda não chegou no mês é futuro', () => {
+    const rec = { ...aluguel, ultimo_processado: null };
+    expect(statusRecorrente(rec, '2026-07-20')).toEqual({ tipo: 'futuro', data: '2026-07-31' });
+  });
+
+  it('inativa não mostra pendência, só o próximo vencimento futuro', () => {
+    const rec = { ...aluguel, ativo: false, ultimo_processado: '2026-07-31' };
+    expect(statusRecorrente(rec, '2026-08-05')).toEqual({ tipo: 'futuro', data: '2026-08-31' });
+  });
+
+  it('inativa com ultimo_processado antigo avança até o próximo futuro', () => {
+    const rec = { ...aluguel, ativo: false, ultimo_processado: '2026-01-31' };
+    expect(statusRecorrente(rec, '2026-08-05')).toEqual({ tipo: 'futuro', data: '2026-08-31' });
+  });
+
+  it('dia 31 em mês com 28 dias vence hoje (clamp)', () => {
+    const rec = { ...aluguel, ultimo_processado: '2026-01-31' };
+    expect(statusRecorrente(rec, '2026-02-28')).toEqual({ tipo: 'hoje' });
+  });
+});
