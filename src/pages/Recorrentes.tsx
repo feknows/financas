@@ -69,9 +69,8 @@ export default function Recorrentes() {
     try { await atualizarRecorrente({ ...r, ativo: !r.ativo }); } catch { /* silencioso */ }
   };
 
-  const excluir = async (r: Recorrente) => {
-    if (!confirm(`Excluir a recorrente "${r.nome}"?`)) return;
-    try { await excluirRecorrente(r.id); } catch { /* silencioso */ }
+  const excluir = (r: Recorrente) => {
+    excluirRecorrente(r.id);
   };
 
   return (

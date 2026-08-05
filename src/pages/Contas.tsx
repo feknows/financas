@@ -50,11 +50,10 @@ export default function Contas() {
     } catch { setMsg('Erro ao salvar.'); }
   };
 
-  const excluir = async (c: Conta) => {
+  const excluir = (c: Conta) => {
     const temLancamentos = lancamentos.some((l) => l.conta_id === c.id || l.conta_destino_id === c.id);
     if (temLancamentos) { alert('Não é possível excluir: a conta tem lançamentos.'); return; }
-    if (!confirm(`Excluir a conta "${c.nome}"?`)) return;
-    try { await excluirConta(c.id); } catch { /* silencioso */ }
+    excluirConta(c.id);
   };
 
   const cartoes = contas.filter((c) => c.tipo === 'cartao');

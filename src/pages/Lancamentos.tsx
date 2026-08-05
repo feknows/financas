@@ -44,9 +44,8 @@ export default function Lancamentos() {
   const corValor = (l: Lancamento) =>
     l.tipo === 'receita' ? 'text-primary' : l.tipo === 'despesa' ? 'text-danger' : 'text-ink-muted';
 
-  const excluir = async (l: Lancamento) => {
-    if (!confirm('Excluir este lançamento?')) return;
-    try { await excluirLancamento(l.id); } catch { /* silencioso */ }
+  const excluir = (l: Lancamento) => {
+    excluirLancamento(l.id);
   };
 
   return (

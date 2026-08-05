@@ -41,9 +41,8 @@ export default function Categorias() {
     }
   };
 
-  const excluir = async (cat: Categoria) => {
-    if (!confirm(`Excluir a categoria "${cat.nome}"? Lançamentos antigos ficam sem categoria.`)) return;
-    try { await excluirCategoria(cat.id); } catch { /* silencioso */ }
+  const excluir = (cat: Categoria) => {
+    excluirCategoria(cat.id);
   };
 
   const porTipo = (t: TipoCategoria) => categorias.filter((c) => c.tipo === t);

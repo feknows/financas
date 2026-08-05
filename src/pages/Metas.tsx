@@ -53,9 +53,8 @@ export default function Metas() {
     } catch { setMsg('Erro ao salvar.'); }
   };
 
-  const excluir = async (m: Meta) => {
-    if (!confirm(`Excluir a meta "${m.nome}"?`)) return;
-    try { await excluirMeta(m.id); } catch { /* silencioso */ }
+  const excluir = (m: Meta) => {
+    excluirMeta(m.id);
   };
 
   return (
