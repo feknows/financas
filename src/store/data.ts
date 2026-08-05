@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import { gerarRecorrentesPendentes } from '../lib/finance';
 import { hojeISO } from '../lib/format';
+import { useToastStore } from './toast';
 import type { Conta, Categoria, Lancamento, Recorrente, Limite, Meta } from '../types';
 
 const num = (v: unknown) => Number(v ?? 0);
@@ -132,9 +133,18 @@ export const useDataStore = create<DataState>((set, get) => ({
   },
 
   excluirConta: async (id) => {
-    const { error } = await supabase.from('contas').delete().eq('id', id);
-    if (error) throw error;
-    set({ contas: get().contas.filter((c) => c.id !== id) });
+    const antes = get().contas;
+    set({ contas: antes.filter((x) => x.id !== id) });
+    let cancelado = false;
+    useToastStore.getState().mostrar('Conta excluída', () => {
+      cancelado = true;
+      set({ contas: antes });
+    });
+    setTimeout(async () => {
+      if (cancelado) return;
+      const { error } = await supabase.from('contas').delete().eq('id', id);
+      if (error) set({ contas: antes });
+    }, 6000);
   },
 
   adicionarCategoria: async (dados) => {
@@ -152,9 +162,18 @@ export const useDataStore = create<DataState>((set, get) => ({
   },
 
   excluirCategoria: async (id) => {
-    const { error } = await supabase.from('categorias').delete().eq('id', id);
-    if (error) throw error;
-    set({ categorias: get().categorias.filter((c) => c.id !== id) });
+    const antes = get().categorias;
+    set({ categorias: antes.filter((x) => x.id !== id) });
+    let cancelado = false;
+    useToastStore.getState().mostrar('Categoria excluída', () => {
+      cancelado = true;
+      set({ categorias: antes });
+    });
+    setTimeout(async () => {
+      if (cancelado) return;
+      const { error } = await supabase.from('categorias').delete().eq('id', id);
+      if (error) set({ categorias: antes });
+    }, 6000);
   },
 
   adicionarLancamento: async (l) => {
@@ -183,8 +202,16 @@ export const useDataStore = create<DataState>((set, get) => ({
   excluirLancamento: async (id) => {
     const antes = get().lancamentos;
     set({ lancamentos: antes.filter((x) => x.id !== id) });
-    const { error } = await supabase.from('lancamentos').delete().eq('id', id);
-    if (error) { set({ lancamentos: antes }); throw error; }
+    let cancelado = false;
+    useToastStore.getState().mostrar('Lançamento excluído', () => {
+      cancelado = true;
+      set({ lancamentos: antes });
+    });
+    setTimeout(async () => {
+      if (cancelado) return;
+      const { error } = await supabase.from('lancamentos').delete().eq('id', id);
+      if (error) set({ lancamentos: antes });
+    }, 6000);
   },
 
   adicionarRecorrente: async (dados) => {
@@ -205,9 +232,18 @@ export const useDataStore = create<DataState>((set, get) => ({
   },
 
   excluirRecorrente: async (id) => {
-    const { error } = await supabase.from('recorrentes').delete().eq('id', id);
-    if (error) throw error;
-    set({ recorrentes: get().recorrentes.filter((x) => x.id !== id) });
+    const antes = get().recorrentes;
+    set({ recorrentes: antes.filter((x) => x.id !== id) });
+    let cancelado = false;
+    useToastStore.getState().mostrar('Recorrente excluída', () => {
+      cancelado = true;
+      set({ recorrentes: antes });
+    });
+    setTimeout(async () => {
+      if (cancelado) return;
+      const { error } = await supabase.from('recorrentes').delete().eq('id', id);
+      if (error) set({ recorrentes: antes });
+    }, 6000);
   },
 
   salvarLimite: async (dados) => {
@@ -248,8 +284,17 @@ export const useDataStore = create<DataState>((set, get) => ({
   },
 
   excluirMeta: async (id) => {
-    const { error } = await supabase.from('metas').delete().eq('id', id);
-    if (error) throw error;
-    set({ metas: get().metas.filter((x) => x.id !== id) });
+    const antes = get().metas;
+    set({ metas: antes.filter((x) => x.id !== id) });
+    let cancelado = false;
+    useToastStore.getState().mostrar('Meta excluída', () => {
+      cancelado = true;
+      set({ metas: antes });
+    });
+    setTimeout(async () => {
+      if (cancelado) return;
+      const { error } = await supabase.from('metas').delete().eq('id', id);
+      if (error) set({ metas: antes });
+    }, 6000);
   }
 }));
