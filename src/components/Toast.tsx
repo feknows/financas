@@ -19,7 +19,7 @@ export default function Toast() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-20 left-1/2 z-40 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 rounded-xl border border-line bg-surface p-4 shadow-lg"
+      className="fixed bottom-[calc(5rem_+_env(safe-area-inset-bottom))] left-1/2 z-40 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 rounded-xl border border-line bg-surface p-4 shadow-lg"
     >
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-medium">{mensagem}</p>

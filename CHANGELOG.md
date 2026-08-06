@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1 — 2026-08-06
+
+- Corrige o rodapé de menus no app instalado (PWA standalone): os elementos fixos da parte de baixo (menu, toast, botão "+", modal) agora respeitam a área segura da tela (`safe-area-inset-bottom`), evitando sobreposição pela curva/gesto de voltar para a home.
+
 ## 1.1.0 — 2026-08-05
 
 - Recorrentes mostram o status de vencimento em cada linha (Pendente desde, Vence hoje, Vence amanhã, Em X dias).

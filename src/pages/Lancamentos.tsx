@@ -107,7 +107,7 @@ export default function Lancamentos() {
 
       <button
         onClick={() => { setEditando(null); setAberto(true); }}
-        className="fixed bottom-20 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-2xl font-bold text-white shadow-lg"
+        className="fixed bottom-[calc(5rem_+_env(safe-area-inset-bottom))] right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-2xl font-bold text-white shadow-lg"
       >
         +
       </button>

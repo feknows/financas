@@ -30,7 +30,7 @@ export default function AppShell() {
 
   return (
     <div className="flex h-full flex-col">
-      <main className="flex-1 overflow-y-auto pb-20">
+      <main className="flex-1 overflow-y-auto pb-[calc(5rem_+_env(safe-area-inset-bottom))]">
         {carregando && (
           <p className="p-5 text-center text-sm text-ink-muted">Carregando...</p>
         )}
@@ -44,7 +44,7 @@ export default function AppShell() {
         )}
         {!carregando && !erro && <Outlet />}
       </main>
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 backdrop-blur">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
         <div className="mx-auto flex max-w-lg items-stretch justify-around">
           {abas.map((a) => (
             <NavLink
